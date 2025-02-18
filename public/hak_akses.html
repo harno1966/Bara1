@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hak Akses - Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: #fff9c4;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            background-color: #ddd;
+            border-radius: 5px;
+        }
+
+        .company-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        nav a:hover {
+            background-color: #ffe082;
+        }
+
+        /* Content Styles */
+        .container {
+            max-width: 800px;
+            margin: 100px auto 20px;
+            padding: 20px;
+        }
+
+        .user-list {
+            max-height: 500px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .user-table th {
+            background-color: #f5f5f5;
+            padding: 12px 20px;
+            text-align: left;
+            font-weight: bold;
+            color: #333;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .user-table td {
+            padding: 12px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .user-table tr {
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .user-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .col-nama { width: 40%; }
+        .col-username { width: 30%; }
+        .col-role { width: 30%; }
+
+        .user-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .user-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .user-list::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .user-list::-webkit-scrollbar-thumb:hover {
+            background: #666;
+        }
+
+        .hak-akses-container {
+            display: none;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .message {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            border-radius: 4px;
+            z-index: 1001;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .back-button {
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .back-button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .form-group h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 100px;
+        }
+
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <div class="logo"></div>
+                <div class="company-name">Nama Perusahaan</div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/">Beranda</a></li>
+                    <li><a href="#pencatatan">Pencatatan</a></li>
+                    <li><a id="logoutBtn">Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="message"></div>
+        
+        <div id="userList" class="user-list">
+            <h2 style="margin-bottom: 20px;">Daftar User</h2>
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th class="col-nama">Nama</th>
+                        <th class="col-username">Username</th>
+                        <th class="col-role">Role</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    <!-- Data user akan diisi oleh JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="hakAksesContainer" class="hak-akses-container">
+            <button class="back-button" onclick="showUserList()">← Kembali ke Daftar User</button>
+            <h2 id="selectedUserInfo" style="margin-bottom: 20px;"></h2>
+            
+            <!-- Grup Beranda - Foto -->
+            <div class="form-group">
+                <h3>Beranda - Foto</h3>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" name="tambah"> Tambah</label>
+                    <label><input type="checkbox" name="edit"> Edit</label>
+                    <label><input type="checkbox" name="simpan"> Simpan</label>
+                    <label><input type="checkbox" name="hapus"> Hapus</label>
+                </div>
+            </div>
+
+            <!-- Grup Pencatatan -->
+            <div class="form-group">
+                <h3>Pencatatan</h3>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" name="like_follow"> Like & Follow</label>
+                    <label><input type="checkbox" name="penjualan"> Penjualan</label>
+                </div>
+            </div>
+
+            <!-- Grup CRUD -->
+            <div class="form-group">
+                <h3 style="display: flex; justify-content: space-between; align-items: center;">
+                    CRUD Like & Follower
+                    <label style="margin-left: 20px;"><input type="checkbox" name="crud_lf"> Aktif</label>
+                </h3>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" name="crud_lf_edit"> Edit</label>
+                    <label><input type="checkbox" name="crud_lf_simpan"> Simpan</label>
+                    <label><input type="checkbox" name="crud_lf_hapus"> Hapus</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <h3 style="display: flex; justify-content: space-between; align-items: center;">
+                    CRUD Penjualan
+                    <label style="margin-left: 20px;"><input type="checkbox" name="crud_penjualan"> Aktif</label>
+                </h3>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" name="crud_penjualan_edit"> Edit</label>
+                    <label><input type="checkbox" name="crud_penjualan_simpan"> Simpan</label>
+                    <label><input type="checkbox" name="crud_penjualan_hapus"> Hapus</label>
+                </div>
+            </div>
+
+            <!-- Grup Pengaturan -->
+            <div class="form-group">
+                <h3>Pengaturan</h3>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" name="hak_akses"> Hak Akses</label>
+                    <label><input type="checkbox" name="laporan"> Laporan</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedUserId = null;
+
+        // Cek session
+        async function checkSession() {
+            try {
+                const response = await fetch('/check-session');
+                const data = await response.json();
+                
+                if (!data.logged_in) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                if (!data.user.hakAkses.hak_akses) {
+                    window.location.href = '/dashboard.html';
+                    return;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Ambil dan tampilkan daftar user
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/users');
+                const users = await response.json();
+                
+                const userTableBody = document.getElementById('userTableBody');
+                userTableBody.innerHTML = users.map(user => `
+                    <tr onclick="selectUser(${user.id}, '${user.nama}', '${user.username}', '${user.role}')">
+                        <td class="col-nama">${user.nama}</td>
+                        <td class="col-username">${user.username}</td>
+                        <td class="col-role">${user.role}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Gagal memuat data users', 'error');
+            }
+        }
+
+        // Pilih user dan tampilkan hak akses
+        async function selectUser(userId, nama, username, role) {
+            selectedUserId = userId;
+            document.getElementById('userList').style.display = 'none';
+            document.getElementById('hakAksesContainer').style.display = 'block';
+            document.getElementById('selectedUserInfo').textContent = `${nama} (${username} - ${role})`;
+
+            try {
+                const response = await fetch('/api/users');
+                const users = await response.json();
+                const user = users.find(u => u.id === userId);
+
+                if (user) {
+                    displayUserHakAkses(user.hakAkses);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Gagal memuat hak akses', 'error');
+            }
+        }
+
+        // Kembali ke daftar user
+        function showUserList() {
+            document.getElementById('hakAksesContainer').style.display = 'none';
+            document.getElementById('userList').style.display = 'block';
+            selectedUserId = null;
+        }
+
+        // Update hak akses
+        async function updateHakAkses(field, value) {
+            if (!selectedUserId) return;
+
+            try {
+                const response = await fetch('/api/hak-akses/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ userId: selectedUserId, field, value })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('Hak akses berhasil diupdate', 'success');
+                } else {
+                    showMessage('Gagal mengupdate hak akses', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Terjadi kesalahan saat mengupdate hak akses', 'error');
+            }
+        }
+
+        // Tampilkan pesan
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = message;
+            messageDiv.className = `message ${type}`;
+            setTimeout(() => {
+                messageDiv.textContent = '';
+                messageDiv.className = 'message';
+            }, 3000);
+        }
+
+        // Update fungsi untuk menampilkan hak akses user
+        function displayUserHakAkses(hakAkses) {
+            // Beranda - Foto
+            document.querySelector('input[name="tambah"]').checked = hakAkses.tambah;
+            document.querySelector('input[name="edit"]').checked = hakAkses.edit;
+            document.querySelector('input[name="simpan"]').checked = hakAkses.simpan;
+            document.querySelector('input[name="hapus"]').checked = hakAkses.hapus;
+
+            // Pencatatan
+            document.querySelector('input[name="like_follow"]').checked = hakAkses.like_follow;
+            document.querySelector('input[name="penjualan"]').checked = hakAkses.penjualan;
+
+            // CRUD Like & Follower
+            document.querySelector('input[name="crud_lf"]').checked = hakAkses.crud_lf;
+            document.querySelector('input[name="crud_lf_edit"]').checked = hakAkses.crud_lf_edit;
+            document.querySelector('input[name="crud_lf_simpan"]').checked = hakAkses.crud_lf_simpan;
+            document.querySelector('input[name="crud_lf_hapus"]').checked = hakAkses.crud_lf_hapus;
+
+            // CRUD Penjualan
+            document.querySelector('input[name="crud_penjualan"]').checked = hakAkses.crud_penjualan;
+            document.querySelector('input[name="crud_penjualan_edit"]').checked = hakAkses.crud_penjualan_edit;
+            document.querySelector('input[name="crud_penjualan_simpan"]').checked = hakAkses.crud_penjualan_simpan;
+            document.querySelector('input[name="crud_penjualan_hapus"]').checked = hakAkses.crud_penjualan_hapus;
+
+            // Pengaturan
+            document.querySelector('input[name="hak_akses"]').checked = hakAkses.hak_akses;
+            document.querySelector('input[name="laporan"]').checked = hakAkses.laporan;
+        }
+
+        // Update fungsi untuk mendapatkan hak akses dari form
+        function getHakAksesFromForm() {
+            return {
+                // Beranda - Foto
+                tambah: document.querySelector('input[name="tambah"]').checked,
+                edit: document.querySelector('input[name="edit"]').checked,
+                simpan: document.querySelector('input[name="simpan"]').checked,
+                hapus: document.querySelector('input[name="hapus"]').checked,
+
+                // Pencatatan
+                like_follow: document.querySelector('input[name="like_follow"]').checked,
+                penjualan: document.querySelector('input[name="penjualan"]').checked,
+
+                // CRUD Like & Follower
+                crud_lf: document.querySelector('input[name="crud_lf"]').checked,
+                crud_lf_edit: document.querySelector('input[name="crud_lf_edit"]').checked,
+                crud_lf_simpan: document.querySelector('input[name="crud_lf_simpan"]').checked,
+                crud_lf_hapus: document.querySelector('input[name="crud_lf_hapus"]').checked,
+
+                // CRUD Penjualan
+                crud_penjualan: document.querySelector('input[name="crud_penjualan"]').checked,
+                crud_penjualan_edit: document.querySelector('input[name="crud_penjualan_edit"]').checked,
+                crud_penjualan_simpan: document.querySelector('input[name="crud_penjualan_simpan"]').checked,
+                crud_penjualan_hapus: document.querySelector('input[name="crud_penjualan_hapus"]').checked,
+
+                // Pengaturan
+                hak_akses: document.querySelector('input[name="hak_akses"]').checked,
+                laporan: document.querySelector('input[name="laporan"]').checked
+            };
+        }
+
+        // Event listener untuk logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await fetch('/logout');
+                window.location.href = '/login.html';
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        // Tambahkan event listeners untuk checkbox CRUD
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', async function() {
+                if (!selectedUserId) return;
+
+                try {
+                    await updateHakAkses(this.name, this.checked);
+                } catch (error) {
+                    console.error('Error:', error);
+                    showMessage('Gagal mengupdate hak akses', 'error');
+                    // Kembalikan state checkbox jika gagal
+                    this.checked = !this.checked;
+                }
+            });
+        });
+
+        // Inisialisasi
+        checkSession();
+        loadUsers();
+    </script>
+</body>
+</html> 

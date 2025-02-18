@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .panel-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            color: #333;
+        }
+
+        .button-group {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .crud-button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .crud-button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <div class="logo"></div>
+                <div class="company-name">Nama Perusahaan</div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/beranda.html">Beranda</a></li>
+                    <li><a href="#pencatatan">Pencatatan</a></li>
+                    <li><a id="logoutBtn">Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>Panel Hak Akses</h1>
+        <div id="menuContainer"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const response = await fetch('/check-session');
+                const data = await response.json();
+                
+                if (!data.logged_in) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                const menuContainer = document.getElementById('menuContainer');
+                const hakAkses = data.user.hakAkses;
+                let html = '';
+
+                // Grup Beranda - Foto
+                if (hakAkses.tambah || hakAkses.edit || hakAkses.simpan || hakAkses.hapus) {
+                    html += `
+                        <div class="panel-title">Beranda - Foto</div>
+                        <div class="button-group">
+                            ${hakAkses.tambah ? '<button class="crud-button">Tambah</button>' : ''}
+                            ${hakAkses.edit ? '<button class="crud-button">Edit</button>' : ''}
+                            ${hakAkses.simpan ? '<button class="crud-button">Simpan</button>' : ''}
+                            ${hakAkses.hapus ? '<button class="crud-button">Hapus</button>' : ''}
+                        </div>
+                    `;
+                }
+
+                // Grup Pencatatan
+                if (hakAkses.like_follow || hakAkses.penjualan) {
+                    html += `
+                        <div class="panel-title">Pencatatan</div>
+                        <div class="button-group">
+                            ${hakAkses.like_follow ? '<button class="crud-button" onclick="openLikeFollow()">Like & Follow</button>' : ''}
+                            ${hakAkses.penjualan ? '<button class="crud-button">Penjualan</button>' : ''}
+                        </div>
+                    `;
+                }
+
+                // Grup CRUD Like & Follower
+                if (hakAkses.crud_lf) {
+                    html += `
+                        <div class="panel-title">CRUD Like & Follower</div>
+                        <div class="button-group">
+                            <button class="crud-button" onclick="openCrudLikeFollow()">CRUD Like & Follower</button>
+                        </div>
+                    `;
+                }
+
+                // Grup CRUD Penjualan
+                if (hakAkses.crud_penjualan) {
+                    html += `
+                        <div class="panel-title">CRUD Penjualan</div>
+                        <div class="button-group">
+                            <button class="crud-button">CRUD Penjualan</button>
+                        </div>
+                    `;
+                }
+
+                // Grup Pengaturan
+                if (hakAkses.hak_akses || hakAkses.laporan) {
+                    html += `
+                        <div class="panel-title">Pengaturan</div>
+                        <div class="button-group">
+                            ${hakAkses.hak_akses ? '<button class="crud-button" onclick="openHakAkses()">Hak Akses</button>' : ''}
+                            ${hakAkses.laporan ? '<button class="crud-button" onclick="openLaporanPanel()">Laporan</button>' : ''}
+                        </div>
+                    `;
+                }
+
+                menuContainer.innerHTML = html;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        // Handle logout
+        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                await fetch('/logout');
+                window.location.href = '/login.html';
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        // Fungsi navigasi
+        function openLikeFollow() {
+            window.location.href = '/pencatatan/like-follow.html';
+        }
+
+        function openLaporanPanel() {
+            window.location.href = '/laporan/panel.html';
+        }
+
+        function openHakAkses() {
+            window.location.href = '/hak_akses.html';
+        }
+
+        // Tambahkan fungsi untuk membuka CRUD Like & Follow
+        function openCrudLikeFollow() {
+            window.location.href = '/pencatatan/crud-like-follow.html';
+        }
+    </script>
+</body>
+</html> 

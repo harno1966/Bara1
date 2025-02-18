@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beranda</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: #fff9c4;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            background-color: #ddd;
+            border-radius: 5px;
+        }
+
+        .company-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        nav a:hover {
+            background-color: #ffe082;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 100px auto 20px;
+            padding: 20px;
+        }
+
+        .welcome-message {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .welcome-message h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .welcome-message p {
+            font-size: 1.2em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <div class="logo"></div>
+                <div class="company-name">Nama Perusahaan</div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/beranda.html" class="active">Beranda</a></li>
+                    <li><a href="#pencatatan">Pencatatan</a></li>
+                    <li><a id="logoutBtn">Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="welcome-message">
+            <h1>Selamat Datang</h1>
+            <p>Anda telah berhasil login ke sistem</p>
+        </div>
+    </div>
+
+    <script>
+        // Cek session
+        async function checkSession() {
+            try {
+                const response = await fetch('/check-session');
+                const data = await response.json();
+                
+                if (!data.logged_in) {
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Event listener untuk logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await fetch('/logout');
+                window.location.href = '/login.html';
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        // Cek session saat halaman dimuat
+        checkSession();
+    </script>
+</body>
+</html> 

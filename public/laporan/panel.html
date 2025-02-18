@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Laporan</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .panel-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            color: #333;
+        }
+
+        .button-group {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .crud-button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .crud-button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .btn-hak-akses {
+            background-color: #9C27B0;
+            color: white;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 120px;
+        }
+
+        .btn-back {
+            background-color: #757575;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .button-container {
+                padding: 0 20px;
+            }
+
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <div class="logo"></div>
+                <div class="company-name">Nama Perusahaan</div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/beranda.html">Beranda</a></li>
+                    <li><a href="#pencatatan">Pencatatan</a></li>
+                    <li><a id="logoutBtn">Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>Panel Laporan</h1>
+        <div class="button-group">
+            <button class="crud-button" onclick="openLikeFollowReport()">Like & Follower</button>
+            <button class="crud-button" onclick="openSalesReport()">Penjualan</button>
+            <button class="crud-button" onclick="openProductReport()">Produk</button>
+        </div>
+        <div class="button-container">
+            <button class="btn btn-back" onclick="goBack()">Kembali</button>
+        </div>
+    </div>
+
+    <script>
+        // Cek session
+        async function checkSession() {
+            try {
+                const response = await fetch('/check-session');
+                const data = await response.json();
+                
+                if (!data.logged_in) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                // Cek hak akses laporan
+                if (!data.user.hakAkses.laporan) {
+                    window.location.href = '/beranda.html';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Fungsi untuk membuka laporan
+        function openLikeFollowReport() {
+            window.location.href = '/laporan/like-follow.html';
+        }
+
+        function openSalesReport() {
+            window.location.href = '/laporan/penjualan.html';
+        }
+
+        function openProductReport() {
+            window.location.href = '/laporan/produk.html';
+        }
+
+        // Event listener untuk logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await fetch('/logout');
+                window.location.href = '/login.html';
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        // Fungsi untuk kembali ke panel sebelumnya
+        function goBack() {
+            window.location.href = '/dashboard.html';
+        }
+
+        // Inisialisasi
+        checkSession();
+    </script>
+</body>
+</html> 

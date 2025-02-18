@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Like & Follow - Pencatatan</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: #fff9c4;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            background-color: #ddd;
+            border-radius: 5px;
+        }
+
+        .company-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        nav a:hover {
+            background-color: #ffe082;
+        }
+
+        /* Form Container */
+        .container {
+            max-width: 800px;
+            margin: 100px auto 40px;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .form-title {
+            text-align: center;
+            color: #333;
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input[type="text"]:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 2px rgba(74,144,226,0.2);
+        }
+
+        .form-group input[readonly] {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+
+        /* Checkbox Styles */
+        .checkbox-section {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-title {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        /* Button Styles */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-save {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-cancel {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .message {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                margin: 80px 20px 40px;
+                padding: 1.5rem;
+            }
+
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .popup.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+
+        .popup.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <div class="logo"></div>
+                <div class="company-name">Nama Perusahaan</div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/beranda.html">Beranda</a></li>
+                    <li><a href="#pencatatan">Pencatatan</a></li>
+                    <li><a id="logoutBtn">Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2 class="form-title">Form Like & Follow</h2>
+        <div id="message"></div>
+        
+        <form id="likeFollowForm">
+            <div class="form-group">
+                <label for="tanggal">Tanggal:</label>
+                <input type="text" id="tanggal" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="nama">Nama Customer:</label>
+                <input type="text" id="nama" placeholder="Masukkan nama customer">
+            </div>
+
+            <div class="form-group">
+                <label for="ig">Akun Instagram:</label>
+                <input type="text" id="ig" placeholder="Masukkan username Instagram">
+            </div>
+
+            <div class="form-group">
+                <label for="tt">Akun TikTok:</label>
+                <input type="text" id="tt" placeholder="Masukkan username TikTok">
+            </div>
+
+            <div class="form-group">
+                <label for="sv">Akun SnackVideo:</label>
+                <input type="text" id="sv" placeholder="Masukkan username SnackVideo">
+            </div>
+
+            <div class="checkbox-section">
+                <div class="checkbox-title">Like:</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="likeIG">
+                        <label for="likeIG">Instagram</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="likeTT">
+                        <label for="likeTT">TikTok</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="likeSV">
+                        <label for="likeSV">SnackVideo</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="checkbox-section">
+                <div class="checkbox-title">Follow:</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="followIG">
+                        <label for="followIG">Instagram</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="followTT">
+                        <label for="followTT">TikTok</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="followSV">
+                        <label for="followSV">SnackVideo</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn btn-save">Simpan</button>
+                <button type="button" class="btn btn-cancel">Batal</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Set tanggal otomatis
+        function setCurrentDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            document.getElementById('tanggal').value = now.toLocaleDateString('id-ID', options);
+        }
+
+        // Cek session
+        async function checkSession() {
+            try {
+                const response = await fetch('/check-session');
+                const data = await response.json();
+                
+                if (!data.logged_in) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                // Hanya cek hak akses untuk like_follow
+                if (!data.user.hakAkses.like_follow) {
+                    window.location.href = '/beranda.html';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Tambahkan fungsi resetForm sebelum event listeners
+        function resetForm() {
+            // Reset input fields
+            document.getElementById('nama').value = '';
+            document.getElementById('ig').value = '';
+            document.getElementById('tt').value = '';
+            document.getElementById('sv').value = '';
+
+            // Reset checkboxes
+            document.getElementById('likeIG').checked = false;
+            document.getElementById('likeTT').checked = false;
+            document.getElementById('likeSV').checked = false;
+            document.getElementById('followIG').checked = false;
+            document.getElementById('followTT').checked = false;
+            document.getElementById('followSV').checked = false;
+
+            // Update tanggal
+            setCurrentDate();
+        }
+
+        // Update fungsi saveData dengan validasi checkbox
+        async function saveData() {
+            try {
+                const formData = {
+                    nama_customer: document.getElementById('nama').value,
+                    akun_ig: document.getElementById('ig').value,
+                    akun_tt: document.getElementById('tt').value,
+                    akun_sv: document.getElementById('sv').value,
+                    like_ig: document.getElementById('likeIG').checked,
+                    like_tt: document.getElementById('likeTT').checked,
+                    like_sv: document.getElementById('likeSV').checked,
+                    follow_ig: document.getElementById('followIG').checked,
+                    follow_tt: document.getElementById('followTT').checked,
+                    follow_sv: document.getElementById('followSV').checked
+                };
+
+                // Validasi kesesuaian akun dan checkbox
+                let errors = [];
+
+                // Validasi Instagram
+                if (formData.akun_ig) {
+                    if (!formData.like_ig && !formData.follow_ig) {
+                        errors.push("Akun Instagram diisi tapi tidak dicentang Like/Follow Instagram");
+                    }
+                } else {
+                    if (formData.like_ig || formData.follow_ig) {
+                        errors.push("Like/Follow Instagram dicentang tapi akun Instagram kosong");
+                    }
+                }
+
+                // Validasi TikTok
+                if (formData.akun_tt) {
+                    if (!formData.like_tt && !formData.follow_tt) {
+                        errors.push("Akun TikTok diisi tapi tidak dicentang Like/Follow TikTok");
+                    }
+                } else {
+                    if (formData.like_tt || formData.follow_tt) {
+                        errors.push("Like/Follow TikTok dicentang tapi akun TikTok kosong");
+                    }
+                }
+
+                // Validasi SnackVideo
+                if (formData.akun_sv) {
+                    if (!formData.like_sv && !formData.follow_sv) {
+                        errors.push("Akun SnackVideo diisi tapi tidak dicentang Like/Follow SnackVideo");
+                    }
+                } else {
+                    if (formData.like_sv || formData.follow_sv) {
+                        errors.push("Like/Follow SnackVideo dicentang tapi akun SnackVideo kosong");
+                    }
+                }
+
+                // Jika ada error, tampilkan pesan
+                if (errors.length > 0) {
+                    showMessage("Kamu salah mencentangnya:\n" + errors.join("\n"), 'error');
+                    return;
+                }
+
+                // Validasi duplikasi akun
+                const checkResponse = await fetch('/api/like-follow/check-duplicate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        akun_ig: formData.akun_ig,
+                        akun_tt: formData.akun_tt,
+                        akun_sv: formData.akun_sv
+                    })
+                });
+
+                const checkResult = await checkResponse.json();
+                
+                if (checkResult.hasDuplicates) {
+                    const platforms = checkResult.duplicates.join(', ');
+                    showMessage(`Akun ${platforms} sudah pernah disimpan`, 'error');
+                    return;
+                }
+
+                // Jika tidak ada error dan duplikasi, lanjut simpan data
+                const saveResponse = await fetch('/api/like-follow/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!saveResponse.ok) {
+                    const error = await saveResponse.json();
+                    throw new Error(error.error || 'Gagal menyimpan data');
+                }
+
+                showMessage('Data berhasil disimpan', 'success');
+                resetForm();
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage(error.message, 'error');
+            }
+        }
+
+        // Update event listener untuk form submit
+        document.getElementById('likeFollowForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                await saveData();
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage(error.message, 'error');
+            }
+        });
+
+        // Update fungsi showMessage
+        function showMessage(message, type) {
+            const overlay = document.createElement('div');
+            overlay.className = 'overlay';
+            document.body.appendChild(overlay);
+
+            const popup = document.createElement('div');
+            popup.className = `popup ${type}`;
+            popup.textContent = message;
+            document.body.appendChild(popup);
+
+            overlay.style.display = 'block';
+            popup.style.display = 'block';
+
+            // Tutup popup saat user klik dimana saja
+            function closePopup() {
+                overlay.remove();
+                popup.remove();
+                document.removeEventListener('click', closePopup);
+                document.removeEventListener('keydown', closePopup);
+            }
+
+            document.addEventListener('click', closePopup);
+            document.addEventListener('keydown', closePopup);
+        }
+
+        // Update tombol Batal
+        document.querySelector('.btn-cancel').onclick = function() {
+            window.location.href = '/dashboard.html';
+        };
+
+        // Event listener untuk logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await fetch('/logout');
+                window.location.href = '/login.html';
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        // Inisialisasi
+        checkSession();
+        setCurrentDate();
+
+        // Tambahkan event listener untuk navigasi beranda
+        document.querySelector('a[href="/beranda.html"]').addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = '/beranda.html';
+        });
+    </script>
+</body>
+</html> 

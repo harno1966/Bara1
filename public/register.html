@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendaftaran User</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <!-- Header yang sama dengan index.html -->
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <div class="logo">
+                    <!-- Logo akan ditambahkan di sini -->
+                </div>
+                <div class="company-name">Nama Perusahaan</div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/">Beranda</a></li>
+                    <li><a href="#pencatatan">Pencatatan</a></li>
+                    <li><a href="/login.html">Login</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container" style="margin-top: 100px;">
+        <div class="register-form">
+            <h2>Pendaftaran User Baru</h2>
+            <div id="message" class="message"></div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="nama">Nama Lengkap:</label>
+                    <input type="text" id="nama" name="nama" required>
+                </div>
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="no_wa">Nomor WhatsApp:</label>
+                    <input type="text" id="no_wa" name="no_wa" required>
+                </div>
+                <div class="form-group">
+                    <label for="role">Role:</label>
+                    <input type="text" id="role" name="role" value="User" readonly>
+                </div>
+                <button type="submit">Daftar</button>
+            </form>
+            <p>Sudah punya akun? <a href="/login.html">Login di sini</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nama: document.getElementById('nama').value,
+                        username: document.getElementById('username').value,
+                        password: document.getElementById('password').value,
+                        email: document.getElementById('email').value,
+                        no_wa: document.getElementById('no_wa').value
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    window.location.href = '/login.html?registered=1';
+                } else {
+                    document.getElementById('message').innerHTML = data.error || 'Pendaftaran gagal';
+                    document.getElementById('message').className = 'message error';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('message').innerHTML = 'Terjadi kesalahan';
+                document.getElementById('message').className = 'message error';
+            }
+        });
+    </script>
+</body>
+</html> 

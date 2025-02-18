@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Like & Follower</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .filter-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .filter-group select, 
+        .filter-group input[type="date"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            min-width: 120px;
+        }
+
+        .btn-landscape {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .btn-portrait {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-excel {
+            background-color: #217346; /* Excel green */
+            color: white;
+        }
+
+        .btn-back {
+            background-color: #757575;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .button-container {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* Styling untuk tabel hasil */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        @media print {
+            header, .filter-container, .button-container {
+                display: none;
+            }
+
+            .container {
+                margin: 0;
+                padding: 0;
+            }
+
+            table {
+                border: 1px solid #ddd;
+            }
+
+            th, td {
+                border: 1px solid #ddd;
+            }
+        }
+
+        /* Style untuk tanggal laporan */
+        .report-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .report-date {
+            font-size: 1.1em;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        /* Style untuk tabel */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        /* Style untuk orientasi */
+        @media screen and (orientation: portrait) { /* 9:16 */
+            .container {
+                padding: 10px;
+            }
+
+            .report-header h1 {
+                font-size: 1.2em;
+            }
+
+            .report-date {
+                font-size: 0.9em;
+            }
+
+            th {
+                font-size: 0.75em;
+                padding: 4px;
+                white-space: nowrap;
+            }
+
+            td {
+                font-size: 0.7em;
+                padding: 4px;
+            }
+
+            .filter-group label {
+                font-size: 0.8em;
+            }
+
+            .filter-group select, 
+            .filter-group input[type="date"] {
+                font-size: 0.8em;
+                padding: 6px;
+            }
+        }
+
+        @media screen and (orientation: landscape) { /* 16:9 */
+            .container {
+                padding: 20px;
+            }
+
+            .report-header h1 {
+                font-size: 1.8em;
+            }
+
+            .report-date {
+                font-size: 1.1em;
+            }
+
+            th {
+                font-size: 1em;
+                padding: 8px 12px;
+            }
+
+            td {
+                font-size: 0.95em;
+                padding: 8px 12px;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            @page {
+                size: auto;
+                margin: 10mm;
+            }
+
+            /* Portrait print */
+            @media (orientation: portrait) {
+                th {
+                    font-size: 8pt;
+                    padding: 4px;
+                }
+                td {
+                    font-size: 8pt;
+                    padding: 4px;
+                }
+            }
+
+            /* Landscape print */
+            @media (orientation: landscape) {
+                th {
+                    font-size: 10pt;
+                    padding: 6px;
+                }
+                td {
+                    font-size: 10pt;
+                    padding: 6px;
+                }
+            }
+        }
+
+        /* Orientasi styles */
+        .orientation-landscape {
+            width: 100%;
+            aspect-ratio: 16/9;
+        }
+
+        .orientation-portrait {
+            width: 100%;
+            aspect-ratio: 9/16;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <div class="logo"></div>
+                <div class="company-name">Nama Perusahaan</div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/beranda.html">Beranda</a></li>
+                    <li><a href="#pencatatan">Pencatatan</a></li>
+                    <li><a id="logoutBtn">Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="report-header">
+            <h1>Laporan Like & Follower</h1>
+            <div class="report-date">
+                Periode: <span id="periodText"></span>
+            </div>
+        </div>
+        
+        <div class="filter-container">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="medsos">Media Sosial</label>
+                    <select id="medsos">
+                        <option value="all">Semua</option>
+                        <option value="ig">Instagram</option>
+                        <option value="tt">TikTok</option>
+                        <option value="sv">SnackVideo</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="likeFollow">Like/Follow</label>
+                    <select id="likeFollow">
+                        <option value="all">Semua</option>
+                        <option value="like">Like</option>
+                        <option value="follow">Follow</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="startDate">Mulai Tanggal</label>
+                    <input type="date" id="startDate">
+                </div>
+
+                <div class="filter-group">
+                    <label for="endDate">Sampai Tanggal</label>
+                    <input type="date" id="endDate">
+                </div>
+            </div>
+
+            <div class="button-container">
+                <button class="btn btn-landscape" onclick="setOrientation('landscape')">Tampilkan 16:9</button>
+                <button class="btn btn-portrait" onclick="setOrientation('portrait')">Tampilkan 9:16</button>
+                <button class="btn btn-excel" onclick="exportToExcel()">Export ke XLS</button>
+                <button class="btn btn-back" onclick="goBack()">Kembali</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>MedSos</th>
+                        <th>Username</th>
+                        <th class="col-like">Like</th>
+                        <th class="col-follow">Follow</th>
+                    </tr>
+                </thead>
+                <tbody id="reportData">
+                    <!-- Data akan diisi melalui JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Set default date values
+        function setDefaultDates() {
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            
+            document.getElementById('startDate').value = firstDay.toISOString().split('T')[0];
+            document.getElementById('endDate').value = today.toISOString().split('T')[0];
+        }
+
+        // Load report data
+        async function loadReportData() {
+            try {
+                const medsos = document.getElementById('medsos').value;
+                const likeFollow = document.getElementById('likeFollow').value;
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+
+                const response = await fetch('/api/laporan/like-follow', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        medsos,
+                        likeFollow,
+                        startDate,
+                        endDate
+                    })
+                });
+
+                if (!response.ok) throw new Error('Gagal memuat data');
+
+                const data = await response.json();
+                updateTable(data);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat memuat data');
+            }
+        }
+
+        // Update table with data
+        function updateTable(data) {
+            const tbody = document.getElementById('reportData');
+            const likeFollow = document.getElementById('likeFollow').value;
+            tbody.innerHTML = '';
+
+            // Update tampilan kolom berdasarkan filter
+            const colLike = document.querySelector('.col-like');
+            const colFollow = document.querySelector('.col-follow');
+
+            if (likeFollow === 'like') {
+                colLike.style.display = '';
+                colFollow.style.display = 'none';
+            } else if (likeFollow === 'follow') {
+                colLike.style.display = 'none';
+                colFollow.style.display = '';
+            } else {
+                colLike.style.display = '';
+                colFollow.style.display = '';
+            }
+
+            data.forEach(item => {
+                const medsos = [];
+                if (item.akun_ig) medsos.push('IG');
+                if (item.akun_tt) medsos.push('TT');
+                if (item.akun_sv) medsos.push('SV');
+
+                medsos.forEach(platform => {
+                    const row = document.createElement('tr');
+                    const username = item[`akun_${platform.toLowerCase()}`];
+                    const isLiked = item[`like_${platform.toLowerCase()}`];
+                    const isFollowed = item[`follow_${platform.toLowerCase()}`];
+
+                    let html = `
+                        <td>${medsos.indexOf(platform) === 0 ? item.nama_customer : ''}</td>
+                        <td>${platform}</td>
+                        <td>${username || ''}</td>
+                    `;
+
+                    // Tambahkan kolom sesuai filter
+                    if (likeFollow === 'like' || likeFollow === 'all') {
+                        html += `<td>${isLiked ? '✓' : ''}</td>`;
+                    }
+                    if (likeFollow === 'follow' || likeFollow === 'all') {
+                        html += `<td>${isFollowed ? '✓' : ''}</td>`;
+                    }
+
+                    row.innerHTML = html;
+                    tbody.appendChild(row);
+                });
+            });
+        }
+
+        // Print report
+        function printReport() {
+            window.print();
+        }
+
+        // Go back to panel
+        function goBack() {
+            window.location.href = '/laporan/panel.html';
+        }
+
+        // Update fungsi untuk menampilkan periode
+        function updatePeriodText() {
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            
+            document.getElementById('periodText').textContent = 
+                `${startDate.toLocaleDateString('id-ID', options)} - ${endDate.toLocaleDateString('id-ID', options)}`;
+        }
+
+        // Update event listeners
+        document.getElementById('startDate').addEventListener('change', () => {
+            updatePeriodText();
+            loadReportData();
+        });
+        document.getElementById('endDate').addEventListener('change', () => {
+            updatePeriodText();
+            loadReportData();
+        });
+        document.getElementById('medsos').addEventListener('change', loadReportData);
+        document.getElementById('likeFollow').addEventListener('change', loadReportData);
+
+        // Initialize
+        setDefaultDates();
+        updatePeriodText();
+        loadReportData();
+
+        // Fungsi untuk mengatur orientasi
+        function setOrientation(orientation) {
+            const container = document.querySelector('.table-container');
+            container.className = 'table-container orientation-' + orientation;
+            
+            // Trigger print dengan orientasi yang sesuai
+            const style = document.createElement('style');
+            style.innerHTML = `@page { size: ${orientation}; }`;
+            document.head.appendChild(style);
+            
+            window.print();
+            
+            // Hapus style setelah print
+            document.head.removeChild(style);
+            container.className = 'table-container';
+        }
+
+        // Fungsi untuk export ke Excel
+        function exportToExcel() {
+            const likeFollow = document.getElementById('likeFollow').value;
+            const table = document.querySelector('table');
+            let csv = [];
+            
+            // Header
+            let header = ['Nama', 'MedSos', 'Username'];
+            if (likeFollow === 'like' || likeFollow === 'all') header.push('Like');
+            if (likeFollow === 'follow' || likeFollow === 'all') header.push('Follow');
+            csv.push(header.join(','));
+
+            // Data rows
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                let rowData = [];
+                row.querySelectorAll('td').forEach((cell, index) => {
+                    let cellData = cell.textContent;
+                    
+                    // Ganti tanda centang dengan karakter yang sesuai
+                    if (index >= 3) { // kolom Like & Follow
+                        cellData = cellData === '✓' ? '✓' : '';
+                    }
+                    
+                    // Escape komma dan quote dalam data
+                    if (cellData.includes(',')) {
+                        cellData = `"${cellData}"`;
+                    }
+                    
+                    rowData.push(cellData);
+                });
+                csv.push(rowData.join(','));
+            });
+
+            // Tambahkan BOM untuk UTF-8
+            const BOM = '\uFEFF';
+            const csvContent = BOM + csv.join('\n');
+            
+            // Download file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'laporan_like_follow.csv');
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html> 

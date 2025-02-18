@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Like & Follower</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .title-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+
+        .count-info {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 0.75;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .count-label {
+            color: #0066cc;
+        }
+
+        .count-value {
+            color: #ff0000;
+        }
+
+        .count-suffix {
+            color: #0066cc;
+        }
+
+        .crud-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .crud-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .crud-button, .back-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            min-width: 80px;
+            font-size: 14px;
+        }
+        
+        .crud-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .crud-button:hover {
+            background-color: #45a049;
+        }
+
+        .back-button {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .back-button:hover {
+            background-color: #5a6268;
+        }
+
+        .table-container {
+            margin-top: 15px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title-section">
+            <h1>Daftar Like & Follower</h1>
+            <div class="count-info">
+                <span class="count-label">Jumlah Like & Follower dari :</span>
+                <span id="countValue" class="count-value">0</span>
+                <span class="count-suffix">Orang</span>
+            </div>
+        </div>
+        
+        <!-- Tombol-tombol -->
+        <div class="crud-container">
+            <div class="crud-buttons">
+                <button id="editBtn" class="crud-button" style="display: none;">Edit</button>
+                <button id="simpanBtn" class="crud-button" style="display: none;">Simpan</button>
+                <button id="hapusBtn" class="crud-button" style="display: none;">Hapus</button>
+            </div>
+            <button onclick="goBack()" class="back-button">Kembali</button>
+        </div>
+
+        <!-- Tabel data -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Nama</th>
+                        <th>MedSos</th>
+                        <th>Username</th>
+                        <th>Like</th>
+                        <th>Follow</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Data akan diisi oleh JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let isEditing = false;
+        let selectedRow = null;
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const response = await fetch('/check-session');
+                const data = await response.json();
+                
+                if (!data.logged_in) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                // Tampilkan tombol sesuai hak akses
+                const hakAkses = data.user.hakAkses;
+                if (hakAkses.crud_lf_edit) {
+                    const editBtn = document.getElementById('editBtn');
+                    editBtn.style.display = 'block';
+                }
+                if (hakAkses.crud_lf_simpan) {
+                    const simpanBtn = document.getElementById('simpanBtn');
+                    simpanBtn.style.display = 'block';
+                }
+                if (hakAkses.crud_lf_hapus) {
+                    const hapusBtn = document.getElementById('hapusBtn');
+                    hapusBtn.style.display = 'block';
+                }
+
+                // Load data
+                await loadData();
+
+                // Event listener untuk tombol CRUD
+                const editBtn = document.getElementById('editBtn');
+                const simpanBtn = document.getElementById('simpanBtn');
+                const hapusBtn = document.getElementById('hapusBtn');
+
+                editBtn.addEventListener('click', toggleEditMode);
+                simpanBtn.addEventListener('click', saveChanges);
+                hapusBtn.addEventListener('click', toggleDeleteMode);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        // Load data dari server
+        async function loadData() {
+            try {
+                const response = await fetch('/api/like-follow/list');
+                const data = await response.json();
+                
+                // Hitung jumlah unique nama_customer
+                const uniqueNames = new Set(data.map(item => item.nama_customer));
+                document.getElementById('countValue').textContent = uniqueNames.size;
+                
+                const tableBody = document.getElementById('tableBody');
+                tableBody.innerHTML = data.map(item => {
+                    // Buat array untuk menyimpan data medsos
+                    const medsos = [];
+                    const usernames = [];
+                    const likes = [];
+                    const follows = [];
+
+                    // Instagram
+                    if (item.akun_ig) {
+                        medsos.push('Instagram');
+                        usernames.push(item.akun_ig);
+                        likes.push(item.like_ig ? '✓' : '-');
+                        follows.push(item.follow_ig ? '✓' : '-');
+                    }
+                    // TikTok
+                    if (item.akun_tt) {
+                        medsos.push('TikTok');
+                        usernames.push(item.akun_tt);
+                        likes.push(item.like_tt ? '✓' : '-');
+                        follows.push(item.follow_tt ? '✓' : '-');
+                    }
+                    // SnackVideo
+                    if (item.akun_sv) {
+                        medsos.push('SnackVideo');
+                        usernames.push(item.akun_sv);
+                        likes.push(item.like_sv ? '✓' : '-');
+                        follows.push(item.follow_sv ? '✓' : '-');
+                    }
+
+                    return `
+                        <tr data-id="${item.id}">
+                            <td>${new Date(item.tanggal).toLocaleDateString()}</td>
+                            <td>${item.nama_customer}</td>
+                            <td>${medsos.join('<br>')}</td>
+                            <td>${usernames.join('<br>')}</td>
+                            <td>${likes.join('<br>')}</td>
+                            <td>${follows.join('<br>')}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Fungsi untuk kembali ke halaman sebelumnya
+        function goBack() {
+            window.location.href = '/dashboard.html';
+        }
+
+        // Fungsi untuk mode edit
+        function toggleEditMode() {
+            isEditing = !isEditing;
+            const editBtn = document.getElementById('editBtn');
+            editBtn.style.backgroundColor = isEditing ? '#ff9800' : '#4CAF50';
+            editBtn.textContent = isEditing ? 'Editing...' : 'Edit';
+
+            const table = document.querySelector('table');
+            table.classList.toggle('editing');
+
+            if (isEditing) {
+                // Tambahkan event listener ke setiap cell
+                document.querySelectorAll('td').forEach(cell => {
+                    cell.addEventListener('click', editCell);
+                });
+            } else {
+                // Hapus event listener
+                document.querySelectorAll('td').forEach(cell => {
+                    cell.removeEventListener('click', editCell);
+                });
+            }
+        }
+
+        // Fungsi untuk edit cell
+        function editCell(event) {
+            if (!isEditing) return;
+
+            const cell = event.target;
+            const columnIndex = cell.cellIndex;
+            const currentValue = cell.textContent.trim();
+
+            // Tanggal - ReadOnly
+            if (columnIndex === 0) return;
+
+            // Nama dan Username - Text input
+            if (columnIndex === 1 || columnIndex === 3) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = currentValue;
+                input.style.width = '100%';
+                
+                input.onblur = function() {
+                    cell.textContent = this.value;
+                };
+
+                cell.textContent = '';
+                cell.appendChild(input);
+                input.focus();
+            }
+            // MedSos - Dropdown
+            else if (columnIndex === 2) {
+                const select = document.createElement('select');
+                select.innerHTML = `
+                    <option value="Instagram">Instagram</option>
+                    <option value="TikTok">TikTok</option>
+                    <option value="SnackVideo">SnackVideo</option>
+                `;
+                select.value = currentValue;
+                
+                select.onchange = function() {
+                    cell.textContent = this.value;
+                };
+
+                cell.textContent = '';
+                cell.appendChild(select);
+            }
+            // Like & Follow - Checkbox
+            else if (columnIndex === 4 || columnIndex === 5) {
+                const select = document.createElement('select');
+                select.innerHTML = `
+                    <option value="✓">Check</option>
+                    <option value="-">UnCheck</option>
+                `;
+                select.value = currentValue;
+                
+                select.onchange = function() {
+                    cell.textContent = this.value;
+                };
+
+                cell.textContent = '';
+                cell.appendChild(select);
+            }
+        }
+
+        // Fungsi untuk simpan perubahan
+        async function saveChanges() {
+            if (!isEditing) return;
+
+            try {
+                const rows = document.querySelectorAll('tbody tr');
+                const updatedData = [];
+
+                rows.forEach(row => {
+                    const cells = row.cells;
+                    const medsosArray = cells[2].textContent.split('<br>');
+                    const usernameArray = cells[3].textContent.split('<br>');
+                    const likeArray = cells[4].textContent.split('<br>');
+                    const followArray = cells[5].textContent.split('<br>');
+
+                    const data = {
+                        id: row.dataset.id,
+                        tanggal: cells[0].textContent,
+                        nama_customer: cells[1].textContent,
+                        medsos: cells[2].textContent,
+                        username: cells[3].textContent,
+                        like: likeArray,  // Kirim array nilai like
+                        follow: followArray  // Kirim array nilai follow
+                    };
+                    updatedData.push(data);
+                });
+
+                const response = await fetch('/api/like-follow/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+
+                if (response.ok) {
+                    alert('Data berhasil disimpan');
+                    toggleEditMode();
+                    loadData();
+                } else {
+                    throw new Error('Gagal menyimpan data');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menyimpan data');
+            }
+        }
+
+        // Fungsi untuk mode hapus
+        function toggleDeleteMode() {
+            const hapusBtn = document.getElementById('hapusBtn');
+            const isDeleting = hapusBtn.classList.toggle('deleting');
+            hapusBtn.style.backgroundColor = isDeleting ? '#dc3545' : '#4CAF50';
+            hapusBtn.textContent = isDeleting ? 'Pilih Baris' : 'Hapus';
+
+            if (isDeleting) {
+                // Tambahkan event listener ke setiap row
+                document.querySelectorAll('tbody tr').forEach(row => {
+                    row.addEventListener('click', confirmDelete);
+                });
+            } else {
+                // Hapus event listener
+                document.querySelectorAll('tbody tr').forEach(row => {
+                    row.removeEventListener('click', confirmDelete);
+                });
+            }
+        }
+
+        // Fungsi untuk konfirmasi hapus
+        async function confirmDelete(event) {
+            const row = event.currentTarget;
+            const id = row.dataset.id;
+
+            if (confirm('Hapus: Y/T')) {
+                try {
+                    const response = await fetch(`/api/like-follow/delete/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        row.remove();
+                        alert('Data berhasil dihapus');
+                    } else {
+                        throw new Error('Gagal menghapus data');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat menghapus data');
+                }
+            }
+
+            toggleDeleteMode();
+        }
+    </script>
+</body>
+</html> 

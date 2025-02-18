@@ -1,0 +1,6 @@
+git config --global user.name "harno1966"
+git config --global user.email "hrnsutejo@gmail.com"
+# Inisialisasi Git repository lokal
+git init
+# Add semua file ke staging
+git add .
